@@ -1,3 +1,4 @@
 /services/gateway-api/vendor
 /services/user-service/vendor
 /services/user-service/.env
+/services/gateway-api/.env
