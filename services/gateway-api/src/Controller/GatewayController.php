@@ -35,4 +35,55 @@ class GatewayController extends AbstractController
             ]
         );
     }
+
+    #[Route('/api/users/register', methods: ['POST'])]
+    public function register(
+        Request $request,
+        HttpClientInterface $client
+    ): Response {
+
+        $response = $client->request(
+            'POST',
+            'http://user-service:8000/api/users/register',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json'
+                ],
+                'body' => $request->getContent()
+            ]
+        );
+
+        return new Response(
+            $response->getContent(false),
+            $response->getStatusCode(),
+            [
+                'Content-Type' => 'application/json'
+            ]
+        );
+    }
+
+    #[Route('/api/profile', methods: ['GET'])]
+    public function profile(
+        Request $request,
+        HttpClientInterface $client
+    ): Response {
+
+        $response = $client->request(
+            'GET',
+            'http://user-service:8000/api/profile',
+            [
+                'headers' => [
+                    'Authorization' => $request->headers->get('Authorization')
+                ]
+            ]
+        );
+
+        return new Response(
+            $response->getContent(false),
+            $response->getStatusCode(),
+            [
+                'Content-Type' => 'application/json'
+            ]
+        );
+    }
 }
