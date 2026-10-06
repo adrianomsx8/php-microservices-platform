@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Messenger\MessageBusInterface;
+use App\Message\UserCreatedMessage;
+use App\Service\RabbitMqPublisher;
 
 class UserController extends AbstractController
 {
@@ -16,7 +19,8 @@ class UserController extends AbstractController
     public function register(
         Request $request,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        RabbitMqPublisher $publisher
     ): JsonResponse {
 
         $data = json_decode($request->getContent(), true);
@@ -43,6 +47,15 @@ class UserController extends AbstractController
 
         $entityManager->persist($user);
         $entityManager->flush();
+
+        $publisher->publish(
+            'user.created',
+            [
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+            ]
+        );
 
         return new JsonResponse([
             'success' => true

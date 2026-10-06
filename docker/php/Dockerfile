@@ -6,7 +6,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     curl \
     libpq-dev \
+    librabbitmq-dev \
     && docker-php-ext-install pdo pdo_pgsql
+
+RUN pecl install amqp && docker-php-ext-enable amqp
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
