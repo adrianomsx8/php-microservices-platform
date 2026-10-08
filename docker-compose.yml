@@ -72,6 +72,13 @@ services:
     ports:
       - "6379:6379"
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
