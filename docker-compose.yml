@@ -43,6 +43,18 @@ services:
       - postgres
       - redis
       - rabbitmq
+  email-service:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: email-service
+    ports:
+      - "8002:8000"
+    command: php -S 0.0.0.0:8000 -t public
+    volumes:
+      - ./services/email-service:/var/www/html
+    depends_on:
+      - rabbitmq
 
   postgres:
     image: postgres:16

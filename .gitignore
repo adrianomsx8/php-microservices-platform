@@ -1,4 +1,6 @@
 /services/gateway-api/vendor
 /services/user-service/vendor
+/services/email-service/vendor
 /services/user-service/.env
 /services/gateway-api/.env
+/services/email-service/.env
