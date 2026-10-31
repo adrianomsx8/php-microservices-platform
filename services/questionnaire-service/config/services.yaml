@@ -1,0 +1,23 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Domain/'
+            - '../src/Application/Questionnaire/DTO/'
+            - '../src/Infrastructure/Persistence/Doctrine/Entity/'
+            - '../src/Infrastructure/Persistence/Doctrine/Migrations/'
+            - '../src/Kernel.php'
+
+    App\Presentation\Http\Controller\:
+        resource: '../src/Presentation/Http/Controller/'
+        tags: ['controller.service_arguments']
+
+    # Add explicit aliases from domain/application ports to infrastructure
+    # adapters here when the questionnaire use cases are implemented.

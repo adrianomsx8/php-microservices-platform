@@ -27,4 +27,10 @@ transacional exige pol?tica de reentrega e consumidor idempotente. Emails duplic
 continuam sujeitos ? constraint existente do banco.
 
 O handler Messenger legado permanece independente do fluxo AMQP atual.
-Questionnaire-service n?o est? presente neste checkout.
+
+## Questionnaire service
+
+O questionnaire-service possui as quatro camadas preparadas. Controllers ficam em
+Presentation/Http/Controller e adaptadores Doctrine em Infrastructure/Persistence/Doctrine.
+Domain/Questionnaire e Application/Questionnaire recebem as futuras regras e casos de uso.
+Consulte services/questionnaire-service/README.md para a estrutura e configuracao.

@@ -56,6 +56,21 @@ services:
     depends_on:
       - rabbitmq
 
+  questionnaire-service:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: questionnaire-service
+    ports:
+      - "8003:8000"
+    command: php -S 0.0.0.0:8000 -t public
+    volumes:
+      - ./services/questionnaire-service:/var/www/html
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+
   postgres:
     image: postgres:16
     container_name: postgres
