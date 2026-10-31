@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Service\EmailSender;
+use App\Application\SendWelcomeEmail;
 use AMQPChannel;
 use AMQPExchange;
 use AMQPConnection;
@@ -16,7 +16,7 @@ class ConsumeUserCreatedCommand extends Command
         'app:consume:user-created';
 
     public function __construct(
-        private EmailSender $emailSender
+        private SendWelcomeEmail $sendWelcomeEmail
     ) {
         parent::__construct();
     }
@@ -61,8 +61,8 @@ class ConsumeUserCreatedCommand extends Command
                     $data['event']
                     === 'user.created'
                 ) {
-                    $this->emailSender
-                        ->sendWelcome(
+                    $this->sendWelcomeEmail
+                        ->execute(
                             $data['payload']['email'],
                             $data['payload']['name']
                         );

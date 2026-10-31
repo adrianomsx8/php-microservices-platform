@@ -18,7 +18,14 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/Application/ProxyResponse.php'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Application\Port\UserService:
+        alias: App\Infrastructure\Http\HttpUserService
+
+    App\Controller\GatewayController:
+        tags: [controller.service_arguments]

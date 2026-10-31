@@ -18,7 +18,20 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/Domain/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Domain\User\UserRepository:
+        alias: App\Infrastructure\Persistence\DoctrineUserRepository
+
+    App\Application\Port\PasswordHasher:
+        alias: App\Infrastructure\Security\SymfonyPasswordHasher
+
+    App\Application\Port\EventPublisher:
+        alias: App\Infrastructure\Messaging\RabbitMqPublisher
+
+    App\Controller\UserController:
+        tags: [controller.service_arguments]

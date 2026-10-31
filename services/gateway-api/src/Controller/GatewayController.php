@@ -1,89 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
+
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Application\ForwardUserRequest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GatewayController extends AbstractController
+final class GatewayController
 {
+    public function __construct(private ForwardUserRequest $forward) {}
+
     #[Route('/api/login', methods: ['POST'])]
-    public function login(
-        Request $request,
-        HttpClientInterface $client
-    ): Response {
-
-        $response = $client->request(
-            'POST',
-            'http://user-service:8000/api/login',
-            [
-                'headers' => [
-                    'Content-Type' => 'application/json'
-                ],
-                'body' => $request->getContent()
-            ]
-        );
-
-        return new Response(
-            $response->getContent(false),
-            $response->getStatusCode(),
-            [
-                'Content-Type' => 'application/json'
-            ]
-        );
+    public function login(Request $request): Response
+    {
+        return $this->proxy($request, 'POST', '/api/login');
     }
 
     #[Route('/api/users/register', methods: ['POST'])]
-    public function register(
-        Request $request,
-        HttpClientInterface $client
-    ): Response {
-
-        $response = $client->request(
-            'POST',
-            'http://user-service:8000/api/users/register',
-            [
-                'headers' => [
-                    'Content-Type' => 'application/json'
-                ],
-                'body' => $request->getContent()
-            ]
-        );
-
-        return new Response(
-            $response->getContent(false),
-            $response->getStatusCode(),
-            [
-                'Content-Type' => 'application/json'
-            ]
-        );
+    public function register(Request $request): Response
+    {
+        return $this->proxy($request, 'POST', '/api/users/register');
     }
 
     #[Route('/api/profile', methods: ['GET'])]
-    public function profile(
-        Request $request,
-        HttpClientInterface $client
-    ): Response {
+    public function profile(Request $request): Response
+    {
+        return $this->proxy($request, 'GET', '/api/profile');
+    }
 
-        $response = $client->request(
-            'GET',
-            'http://user-service:8000/api/profile',
-            [
-                'headers' => [
-                    'Authorization' => $request->headers->get('Authorization')
-                ]
-            ]
-        );
+    private function proxy(Request $request, string $method, string $path): Response
+    {
+        $response = $this->forward->execute($method, $path, $request->getContent(), $request->headers->get('Authorization'));
 
-        return new Response(
-            $response->getContent(false),
-            $response->getStatusCode(),
-            [
-                'Content-Type' => 'application/json'
-            ]
-        );
+        return new Response($response->body, $response->status, ['Content-Type' => 'application/json']);
     }
 }

@@ -1,64 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
+
 namespace App\Controller;
 
-use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Application\RegisterUser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Messenger\MessageBusInterface;
-use App\Message\UserCreatedMessage;
-use App\Service\RabbitMqPublisher;
 
-class UserController extends AbstractController
+final class UserController
 {
     #[Route('/api/users/register', methods: ['POST'])]
-    public function register(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher,
-        RabbitMqPublisher $publisher
-    ): JsonResponse {
+    public function register(Request $request, RegisterUser $registerUser): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($data)) {
+                throw new \InvalidArgumentException('Corpo JSON inv?lido.');
+            }
+            foreach (['name', 'email', 'password'] as $field) {
+                if (!isset($data[$field]) || !is_string($data[$field])) {
+                    throw new \InvalidArgumentException('Campos name, email e password s?o obrigat?rios.');
+                }
+            }
+            $registerUser->execute($data['name'], $data['email'], $data['password']);
+        } catch (\JsonException | \InvalidArgumentException $exception) {
+            return new JsonResponse(['error' => $exception->getMessage()], 400);
+        }
 
-        $data = json_decode($request->getContent(), true);
-
-        $user = new User();
-
-        $user->setName($data['name']);
-        $user->setEmail($data['email']);
-
-        $user->setPassword(
-            $passwordHasher->hashPassword(
-                $user,
-                $data['password']
-            )
-        );
-
-        $user->setCreatedAt(new \DateTimeImmutable());
-
-        $now = new \DateTimeImmutable();
-
-        $user->setCreatedAt($now);
-        $user->setUpdatedAt($now);
-
-
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        $publisher->publish(
-            'user.created',
-            [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-            ]
-        );
-
-        return new JsonResponse([
-            'success' => true
-        ], 201);
+        return new JsonResponse(['success' => true], 201);
     }
 }
